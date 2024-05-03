@@ -20,10 +20,10 @@ This Python script implements an ARP poisoning tool for network analysis and sec
 
 ## Screenshots
 - **Attacker machine:**<br><br>
-![](screenshots\Screenshot_2024-05-03_220237.png)
+![](https://github.com/SaherMuhamed/bhp-arper-mitm/blob/main/screenshots/Screenshot_2024-05-03.png)
 
 - **Victim machine:**<br><br>
-![](screenshots\Screenshot_2024-05-03.png)
+![](https://github.com/SaherMuhamed/bhp-arper-mitm/blob/main/screenshots/Screenshot_2024-05-03_220237.png)
 
 ## Usage
 
